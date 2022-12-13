@@ -76,5 +76,8 @@ for r, line in enumerate(lines):
 
 grid = np.array(data)
 
+#part 1
 print(shortest_path(start, end, grid))
+
+#part 2
 print(fastest_from_a(end, grid))
