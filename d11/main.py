@@ -6,7 +6,7 @@ groups = sys.stdin.read().split('\n\n')
 
 monkeys = []
 
-md = 1
+PART = 1
 
 class Monkey:
     def __init__(self, label, starting_items, op, test, throw1, throw2):
@@ -17,6 +17,7 @@ class Monkey:
         self.test = test
         self.throw1 = throw1
         self.throw2 = throw2
+        self.mod = None
     
     def round(self):
         global monkeys
@@ -27,42 +28,67 @@ class Monkey:
             item = self.op(item)
             #print(item)
 
-            #item = item //3
-            item = item % md
+            if self.mod:
+                item = item % self.mod
+            else:
+                item = item //3
 
             if item % self.test == 0:
                 monkeys[self.throw1].items.append(item)
-                #print(f"threw to monkey {self.throw1}")
             else:
-                #print(f"threw to monkey {self.throw2}")
                 monkeys[self.throw2].items.append(item)
         self.items = []
 
+def part1():
+    global monkeys
+    monkeys = []
+    md = 1
+    for i, group in enumerate(groups):
+        lines = group.split('\n')
+        starting_items = list(map(int, lines[1].split(':')[1].split(',')))
+        op = lines[2].split('=')[1]
+        op = eval(f'lambda old: {op}')
+        test = int(lines[3].split()[-1])
+        md *= test
+        t1 = int(lines[4].split()[-1])
+        t2 = int(lines[5].split()[-1])
+        monkeys.append(Monkey(i, starting_items, op, test, t1, t2))
+
     
-#print(groups)
-for i, group in enumerate(groups):
-    lines = group.split('\n')
-    #print(lines)
-    starting_items = list(map(int, lines[1].split(':')[1].split(',')))
-    op = lines[2].split('=')[1]
-    op = eval(f'lambda old: {op}')
-    test = int(lines[3].split()[-1])
-    md *= test
-    t1 = int(lines[4].split()[-1])
-    t2 = int(lines[5].split()[-1])
-    print(i, starting_items, test, t1, t2)
-    monkeys.append(Monkey(i, starting_items, op, test, t1, t2))
+    PART = 1
+    for _ in range(20):
+        for monkey in monkeys:
+            monkey.round()
 
-
-for _ in range(10000):
+    nbi = []
     for monkey in monkeys:
-        monkey.round()
+        nbi.append(monkey.nbinspections)
+    nbi.sort()
+    print(nbi[-1]*nbi[-2])
 
-nbi = []
-for monkey in monkeys:
-    #print(monkey.items)
-    nbi.append(monkey.nbinspections)
-    print(monkey.nbinspections)
+def part2():
+    global monkeys
+    md = 1
+    monkeys = []
+    for i, group in enumerate(groups):
+        lines = group.split('\n')
+        starting_items = list(map(int, lines[1].split(':')[1].split(',')))
+        op = lines[2].split('=')[1]
+        op = eval(f'lambda old: {op}')
+        test = int(lines[3].split()[-1])
+        md *= test
+        t1 = int(lines[4].split()[-1])
+        t2 = int(lines[5].split()[-1])
+        monkeys.append(Monkey(i, starting_items, op, test, t1, t2))
+    for _ in range(10000):
+        for monkey in monkeys:
+            monkey.mod = md
+            monkey.round()
+    nbi = []
+    for monkey in monkeys:
+        nbi.append(monkey.nbinspections)
+    nbi.sort()
+    print(nbi[-1]*nbi[-2])
 
-nbi.sort()
-print(nbi[-1]*nbi[-2])
+part1()
+part2()
